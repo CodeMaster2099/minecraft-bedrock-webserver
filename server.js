@@ -1,7 +1,8 @@
 const express = require("express");
-const { spawn } = require("child_process");
+const axios = require("axios");
 const multer = require("multer");
-const fs = require("fs");
+
+const LOCAL_AGENT = "http://127.0.0.1:4040"; // <-- replace with your real ngrok URL
 
 const app = express();
 app.use(express.json());
@@ -12,43 +13,40 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// Upload add-ons
+// Upload add-ons (still allowed)
 const upload = multer({ dest: "bedrock/behavior_packs/" });
 
-// Start Bedrock server
-let bedrockProcess = null;
-
-app.get("/start", (req, res) => {
-  if (bedrockProcess) return res.send("Server already running");
-
-  bedrockProcess = spawn("./bedrock_server", [], {
-    cwd: "./bedrock"
-  });
-
-  bedrockProcess.stdout.on("data", data => {
-    console.log(data.toString());
-  });
-
-  bedrockProcess.stderr.on("data", data => {
-    console.error(data.toString());
-  });
-
-  bedrockProcess.on("close", () => {
-    bedrockProcess = null;
-  });
-
-  res.send("Bedrock server started");
+// Forward START to local agent
+app.get("/start", async (req, res) => {
+  try {
+    const r = await axios.post(`${LOCAL_AGENT}/start`);
+    res.send(r.data);
+  } catch (err) {
+    res.status(500).send("Failed to contact local agent");
+  }
 });
 
-// Stop Bedrock server
-app.get("/stop", (req, res) => {
-  if (!bedrockProcess) return res.send("Server not running");
-
-  bedrockProcess.stdin.write("stop\n");
-  res.send("Stopping server");
+// Forward STOP to local agent
+app.get("/stop", async (req, res) => {
+  try {
+    const r = await axios.post(`${LOCAL_AGENT}/stop`);
+    res.send(r.data);
+  } catch (err) {
+    res.status(500).send("Failed to contact local agent");
+  }
 });
 
-// Upload add-on
+// Forward STATUS to local agent
+app.get("/status", async (req, res) => {
+  try {
+    const r = await axios.get(`${LOCAL_AGENT}/status`);
+    res.json(r.data);
+  } catch (err) {
+    res.status(500).send("Failed to contact local agent");
+  }
+});
+
+// Upload add-on (unchanged)
 app.post("/upload-addon", upload.single("addon"), (req, res) => {
   res.send("Add-on uploaded");
 });

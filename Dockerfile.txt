@@ -13,8 +13,11 @@ COPY server.js .
 COPY package*.json ./
 RUN npm install
 
-# Copy Bedrock server files
-COPY bedrock ./bedrock
+# Download Bedrock server
+RUN curl -o bedrock.zip https://minecraft.azureedge.net/bin-linux/bedrock-server-1.21.0.03.zip \
+    && unzip bedrock.zip -d bedrock \
+    && rm bedrock.zip
+
 
 # Expose Bedrock port
 EXPOSE 19132/udp

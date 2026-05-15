@@ -1,26 +1,12 @@
-FROM ubuntu:22.04
+FROM node:18
 
-# Install dependencies
-RUN apt update && apt install -y \
-    curl unzip libssl-dev libc6 libstdc++6 libcurl4 \
-    nodejs npm
-
-# Create app directory
 WORKDIR /app
 
-# Copy Node.js backend
-COPY server.js .
 COPY package*.json ./
 RUN npm install
 
-# Download Bedrock server
-RUN curl -o bedrock.zip https://minecraft.azureedge.net/bin-linux/bedrock-server-1.21.0.03.zip \
-    && unzip bedrock.zip -d bedrock \
-    && rm bedrock.zip
+COPY . .
 
+EXPOSE 3000
 
-# Expose Bedrock port
-EXPOSE 19132/udp
-
-# Start Node.js backend (which starts Bedrock)
 CMD ["node", "server.js"]

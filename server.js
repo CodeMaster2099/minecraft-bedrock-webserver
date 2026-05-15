@@ -1,3 +1,7 @@
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
 const express = require("express");
 const { spawn } = require("child_process");
 const multer = require("multer");

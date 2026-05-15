@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const multer = require("multer");
 
-const LOCAL_AGENT = "https://ignore-zap-scaling.ngrok-free.dev"; // <-- replace with your real ngrok URL
+const LOCAL_AGENT = "https://ignore-zap-scaling.ngrok-free.dev";
 
 const app = express();
 app.use(express.json());
